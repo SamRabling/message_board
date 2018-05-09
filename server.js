@@ -24,6 +24,7 @@ app.set("view engine", "ejs");
 // mongoose db
 mongoose.connect("mongodb://localhost/message_board");
 
+    // message schema
 var MessageSchema = new mongoose.Schema({
     name: { type: String, required: true, minlength: 2 },
     message: { type: String, required: true, minlength: 10 }
@@ -33,6 +34,17 @@ mongoose.model("Message", MessageSchema);
 
 var Message = mongoose.model("Message");
 
+    // comment schema
+var CommentSchema = new mongoose.Schema({
+    name: { type: String, required: true, minlength: 2 },
+    comment: { type: String, required: true, minlength: 10 },
+    messages: [MessageSchema]
+},
+    { timestamps: true });
+mongoose.model("Comment", CommentSchema);
+
+var Comment = mongoose.model("Comment");
+
 // routes
 app.get("/", function (req, res) {
     Message.find({}, function (err, messages) {
@@ -40,75 +52,32 @@ app.get("/", function (req, res) {
     });
 });
 
-app.get("/messages/new", function (req, res) {
-    res.render("new");
-});
 // new user
-app.post("/new", function (req, res) {
-    console.log("post data");
-    var otter = new Otter({
+app.post("/newMessage", function (req, res) {
+    console.log("new message");
+    var message = new Message({
         name: req.body.name,
-        age: req.body.age,
-        favorite_food: req.body.favorite_food
+        message: req.body.message,
     });
-    otter.save(function (err) {
+    message.save(function (err) {
         if (err) {
             console.log("oops! something went wrong", err);
             for (var key in err.errors) {
-                req.flash('otters', err.errors[key].message);
+                req.flash('messages', err.errors[key].message);
             }
-            res.redirect("index");
+            res.redirect("/");
         } else {
-            console.log("successfully added an otter!");
+            console.log("successfully added a message!");
             res.redirect("/");
         }
-    });
-});
-//show a specific user
-app.get("/otters/:id", function (req, res, err) {
-    var id = req.params.id;
-    Otter.findById({ _id: id }, function (err, otters) {
-        res.render("show", { otters: otters });
     });
 });
 
-// update a user
-app.get("/otters/:id/edit", function (req, res) {
-    var id = req.params.id;
-    Otter.findById({ _id: id }, function (err, otters) {
-        res.render("edit", { otters: otters });
-    });
-});
-// update a user
-app.post("/otters/:id", function (req, res, err) {
-    var id = req.params.id;
-    Otter.update({ _id: id }, {
-        name: req.body.name,
-        age: req.body.age,
-        favorite_food: req.body.favorite_food
-    }, err => {
-        if (err) {
-            res.redirect("/", { errors: otter.errors });
-            console.log("oops! something went wrong");
-        } else {
-            res.redirect("/");
-        }
-    })
-});
 
-// delete a user
-app.get("/otters/:id/delete", function (req, res, err) {
-    var id = req.params.id;
-    Otter.findByIdAndRemove({ _id: id }, function (err) {
-        if (err) {
-            res.redirect("/otter/:id", { errors: otter.errors });
-            console.log("oops! something went wrong");
-        } else {
-            console.log("successfully updated an otter!");
-            res.redirect("/");
-        }
-    });
-});
+
+
+
+
 
 // port
 app.listen(5000, function () {
