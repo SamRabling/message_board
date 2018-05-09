@@ -9,24 +9,36 @@
 </head>
 <body>
     <h1>The Dojo Message Board</h1>
-    <div class="main-content">''
-        <form action="#" method="post">
+    <div class="main-content">
+        <% if(messages.messages) {%>
+            <% for(var i of messages.messages){ %>
+                <p><%= i %></p>
+            <% } %>
+        <% } %>
+
+        <form action="/newMessage" method="post">
             Name:<input type="text" name="name">
-            Message: <input type="text" name="message"
+            Message: <input type="text" name="message">
             <input type="submit" value="Post Message">
         </form>
         <% for(var i in messages){ %>
             <div class="message">
-                <h4>Name: <%=message.name%></h4>
-                <h4>Message: <%=message.message%></h4>
+                <h4>Name: <%=messages[i].name%></h4>
+                <h4>Message: <%=messages[i].message%></h4>
             </div>
+            <% if(messages.comment) {%>
+                <% for(var i of messages.comments){ %>
+                    <p><%= i %></p>
+                <% } %>
+            
             <%for(var j in comments){%>
                 <div class="comment">
-                    <p>Name: <%=comment.name%></p>
-                    <p>Comment: <%=comment.comment%></p>
+                    <p>Name: <%=comments[j].name%></p>
+                    <p>Comment: <%=comments[j].comment%></p>
                 </div>
             <% } %>
-            <form action="#" method="post">
+            <% } %>
+            <form action="/newComment" method="post">
                 Name:<input type="text" name="name">
                 Comment:<input type="text" name="comment">
                 <input type="submit" value="Post Comment">

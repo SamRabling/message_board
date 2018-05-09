@@ -24,26 +24,26 @@ app.set("view engine", "ejs");
 // mongoose db
 mongoose.connect("mongodb://localhost/message_board");
 
-    // message schema
-var MessageSchema = new mongoose.Schema({
-    name: { type: String, required: true, minlength: 2 },
-    message: { type: String, required: true, minlength: 10 }
-},
-{ timestamps: true });
-mongoose.model("Message", MessageSchema);
-
-var Message = mongoose.model("Message");
-
     // comment schema
 var CommentSchema = new mongoose.Schema({
     name: { type: String, required: true, minlength: 2 },
-    comment: { type: String, required: true, minlength: 10 },
-    messages: [MessageSchema]
+    comment: { type: String, required: true, minlength: 10 }
 },
     { timestamps: true });
 mongoose.model("Comment", CommentSchema);
 
 var Comment = mongoose.model("Comment");
+
+    // message schema
+var MessageSchema = new mongoose.Schema({
+    name: { type: String, required: true, minlength: 2 },
+    message: { type: String, required: true, minlength: 10 },
+    comment: [CommentSchema]
+},
+{ timestamps: true });
+mongoose.model("Message", MessageSchema);
+
+var Message = mongoose.model("Message");
 
 // routes
 app.get("/", function (req, res) {
@@ -52,7 +52,7 @@ app.get("/", function (req, res) {
     });
 });
 
-// new user
+// new Message
 app.post("/newMessage", function (req, res) {
     console.log("new message");
     var message = new Message({
@@ -73,11 +73,33 @@ app.post("/newMessage", function (req, res) {
     });
 });
 
-
-
-
-
-
+// new Comment
+app.post("/newComment", function(req, res){
+    console.log("new comment");
+        Message.findOne({_id: req.body.message_id}, function(err, message){
+            if (err){
+                res.redirect("/");
+            }
+            else{
+                message.comment.push({ name: req.body.name, comment: req.body.comment});
+            }
+        
+        message.save(function (err) {
+            console.log("saved comment");
+            if (err) {
+                console.log("oops! something went wrong", err);
+                for (var key in err.errors) {
+                    req.flash('comments', err.errors[key].comment);
+                }
+                res.redirect("/");
+            } else {
+                console.log("successfully added a comment!");
+                res.redirect("/");
+            }
+        
+            });
+        });
+    });
 
 // port
 app.listen(5000, function () {
