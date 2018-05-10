@@ -74,32 +74,23 @@ app.post("/newMessage", function (req, res) {
 });
 
 // new Comment
-app.post("/newComment", function(req, res){
-    console.log("new comment");
-        Message.findOne({_id: req.body.message_id}, function(err, message){
-            if (err){
-                res.redirect("/");
+app.post("/newComment/:id", function(req, res){
+    var message = Message.findOne({ _id: req.body.id }, function (err, message){
+        if (err) {
+            for (var key in err.errors) {
+                req.flash('comments', err.errors[key].comment);
             }
-            else{
-                message.comment.push({ name: req.body.name, comment: req.body.comment});
-            }
-        
-        message.save(function (err) {
-            console.log("saved comment");
-            if (err) {
-                console.log("oops! something went wrong", err);
-                for (var key in err.errors) {
-                    req.flash('comments', err.errors[key].comment);
-                }
-                res.redirect("/");
-            } else {
-                console.log("successfully added a comment!");
-                res.redirect("/");
-            }
-        
+            res.redirect("/"); 
+        }
+        else{
+            message.comment.push({ name: req.body.name, comment: req.body.comment });
+            message.save(function(err){
+                res.redirect("/"); 
             });
-        });
-    });
+
+        }
+    });  
+});  
 
 // port
 app.listen(5000, function () {
